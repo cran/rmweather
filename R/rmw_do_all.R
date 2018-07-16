@@ -12,6 +12,11 @@
 #' @param variables Independent/explanatory variables used to predict 
 #' \code{"value"}. 
 #' 
+#' @param variables_sample Variables to use for the normalisation step. If not 
+#' used, the default of all variables used for training the model with the 
+#' exception of \code{date_unix}, the trend term (see 
+#' \code{\link{rmw_normalise}}).
+#' 
 #' @param n_trees Number of trees to grow to make up the forest. 
 #' 
 #' @param min_node_size Minimal node size. 
@@ -19,9 +24,19 @@
 #' @param mtry Number of variables to possibly split at in each node. Default is 
 #' the (rounded down) square root of the number variables.
 #' 
+#' @param keep_inbag Should in-bag data be kept in the \strong{ranger} model 
+#' object? This needs to be \code{TRUE} if standard errors are to be calculated
+#' when predicting with the model. 
+#' 
 #' @param n_samples Number of times to sample \code{df} and then predict? 
 #' 
 #' @param replace Should \code{variables} be sampled with replacement? 
+#' 
+#' @param se Should the standard error of the predictions be calculated too? 
+#' The standard error method is the "infinitesimal jackknife for bagging" and 
+#' will slow down the predictions significantly. 
+#' 
+#' @param aggregate Should all the \code{n_samples} predictions be aggregated?
 #' 
 #' @param n_cores Number of CPU cores to use for the model calculation. Default
 #' is system's total minus one. 
@@ -59,9 +74,20 @@
 #' }
 #' 
 #' @export
-rmw_do_all <- function(df, variables, n_trees = 300, min_node_size = 5, 
-                       mtry = NULL, n_samples = 300, replace = TRUE, 
-                       n_cores = NA, verbose = FALSE) {
+rmw_do_all <- function(df, variables, variables_sample = NA, n_trees = 300, 
+                       min_node_size = 5, mtry = NULL, keep_inbag = TRUE,
+                       n_samples = 300, replace = TRUE, se = FALSE, 
+                       aggregate = TRUE, n_cores = NA, verbose = FALSE) {
+  
+  # Check inputs
+  if (se && !keep_inbag) {
+    
+    stop(
+      "To calculate standard errors, `keep_inbag` needs to be `TRUE`...", 
+      call. = FALSE
+    )
+    
+  }
   
   # Get date
   date_start <- as.numeric(lubridate::now())
@@ -73,6 +99,7 @@ rmw_do_all <- function(df, variables, n_trees = 300, min_node_size = 5,
     n_trees = n_trees,
     mtry = mtry,
     min_node_size = min_node_size,
+    keep_inbag = keep_inbag,
     n_cores = n_cores,
     verbose = verbose
   )
@@ -87,9 +114,11 @@ rmw_do_all <- function(df, variables, n_trees = 300, min_node_size = 5,
   df_normalised <- rmw_normalise(
     model, 
     df, 
-    variables = NA,
+    variables = variables_sample,
     n_samples = n_samples,
     replace = replace,
+    se = se,
+    aggregate = aggregate,
     n_cores = n_cores,
     verbose = verbose
   )
@@ -113,6 +142,7 @@ rmw_do_all <- function(df, variables, n_trees = 300, min_node_size = 5,
   list_normalisation <- list(
     observations = df,
     model = model,
+    n_samples = as.integer(n_samples),
     normalised = df_normalised,
     elapsed_times = df_times
   )

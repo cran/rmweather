@@ -27,6 +27,21 @@ test_that("Test data preparation function", {
 })
 
 
+test_that("Test data preparation function with custom arguments", {
+  
+  expect_identical(
+    class(rmw_prepare_data(data_london, value = "nox", na.rm = TRUE)), 
+    "data.frame"
+  )
+  
+  expect_identical(
+    class(rmw_prepare_data(data_london, value = "nox", replace = TRUE)), 
+    "data.frame"
+  )
+  
+})
+
+
 test_that("Test training function", {
   
   # Keep it reproducible
@@ -50,7 +65,7 @@ test_that("Test training function", {
   
   # Test model return
   expect_identical(class(model), "ranger")
-  expect_equal(model$r.squared, 0.4184627)
+  expect_equal(model$r.squared, 0.4184627, tolerance = 0.1)
   
   # Extract things from model
   df_importance <- rmw_model_importance(model)
@@ -116,6 +131,47 @@ test_that("Test normalising function", {
 })
 
 
+test_that("Test normalising function with standard error calculation", {
+  
+  # Keep it reproducible
+  set.seed(123)
+  
+  # Get data
+  df <- data_london %>% 
+    rename(value = no2) %>% 
+    rmw_prepare_data()
+  
+  # Use standard variables but minimal defaults, testing execution, not performance...
+  model <- rmw_train_model(
+    df,
+    variables = c(
+      "air_temp", "atmospheric_pressure", "rh", "wd", "ws", "date_unix", 
+      "day_julian", "weekday"
+    ),
+    n_trees = 5,
+    n_cores = 1
+  )
+  
+  # Test prediction function
+  expect_identical(class(rmw_predict(model, df, se = TRUE, n_cores = 1)), "list")
+  
+  # Now normalise
+  df_normalise <- rmw_normalise(
+    model = model, 
+    df = df,
+    se = TRUE,
+    n_samples = 2,
+    n_cores = 1
+  )
+  
+  # Check 
+  expect_identical(class(df_normalise), "data.frame")
+  expect_identical(names(df_normalise), c("date", "value_predict", "se"))
+  expect_identical(class(df$date)[1], "POSIXct")
+  
+})
+
+
 test_that("Test `rmw_do_all` function", {
   
   # Keep it reproducible
@@ -144,7 +200,47 @@ test_that("Test `rmw_do_all` function", {
   # Check types
   expect_identical(
     unname(purrr::map_chr(list_normalised, class)),
-    c("data.frame", "ranger", "data.frame", "data.frame")
+    c("data.frame", "ranger", "integer", "data.frame", "data.frame")
+  )
+  
+})
+
+
+test_that("Test `rmw_do_all` function and use varable_sample argument", {
+  
+  # Keep it reproducible
+  set.seed(123)
+  
+  # Get data, use nox to be different
+  df <- data_london %>% 
+    rename(value = nox) %>% 
+    rmw_prepare_data()
+  
+  variables <- c(
+    "air_temp", "atmospheric_pressure", "rh", "wd", "ws", "date_unix", 
+    "day_julian", "weekday"
+  )
+  
+  # Drop
+  variables_sample <- setdiff(variables, c("date_unix", "wd"))
+  
+  # Do
+  list_normalised <- rmw_do_all(
+    df = df,
+    variables = variables,
+    variables_sample = variables_sample,
+    n_trees = 1,
+    n_samples = 2,
+    n_cores = 1
+  )
+  
+  # Check types
+  expect_identical(class(list_normalised), "list")
+  
+  # Check types
+  expect_identical(
+    unname(purrr::map_chr(list_normalised, class)),
+    c("data.frame", "ranger", "integer", "data.frame", "data.frame")
   )
   
 })

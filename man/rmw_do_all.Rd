@@ -6,8 +6,10 @@
 concentrations using meteorological and time variables and then immediately
 normalise a variable for "average" meteorological conditions.}
 \usage{
-rmw_do_all(df, variables, n_trees = 300, min_node_size = 5, mtry = NULL,
-  n_samples = 300, replace = TRUE, n_cores = NA, verbose = FALSE)
+rmw_do_all(df, variables, variables_sample = NA, n_trees = 300,
+  min_node_size = 5, mtry = NULL, keep_inbag = TRUE, n_samples = 300,
+  replace = TRUE, se = FALSE, aggregate = TRUE, n_cores = NA,
+  verbose = FALSE)
 }
 \arguments{
 \item{df}{Input data frame after preparation with 
@@ -17,6 +19,11 @@ will be checked for before modelling.}
 \item{variables}{Independent/explanatory variables used to predict 
 \code{"value"}.}
 
+\item{variables_sample}{Variables to use for the normalisation step. If not 
+used, the default of all variables used for training the model with the 
+exception of \code{date_unix}, the trend term (see 
+\code{\link{rmw_normalise}}).}
+
 \item{n_trees}{Number of trees to grow to make up the forest.}
 
 \item{min_node_size}{Minimal node size.}
@@ -24,9 +31,19 @@ will be checked for before modelling.}
 \item{mtry}{Number of variables to possibly split at in each node. Default is 
 the (rounded down) square root of the number variables.}
 
+\item{keep_inbag}{Should in-bag data be kept in the \strong{ranger} model 
+object? This needs to be \code{TRUE} if standard errors are to be calculated
+when predicting with the model.}
+
 \item{n_samples}{Number of times to sample \code{df} and then predict?}
 
 \item{replace}{Should \code{variables} be sampled with replacement?}
+
+\item{se}{Should the standard error of the predictions be calculated too? 
+The standard error method is the "infinitesimal jackknife for bagging" and 
+will slow down the predictions significantly.}
+
+\item{aggregate}{Should all the \code{n_samples} predictions be aggregated?}
 
 \item{n_cores}{Number of CPU cores to use for the model calculation. Default
 is system's total minus one.}
