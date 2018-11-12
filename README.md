@@ -29,13 +29,6 @@ library(devtools)
 install_github("skgrange/rmweather")
 ```
 
-The lightweight [**ghit**](https://github.com/cloudyr/ghit) package (soon to be replaced with [**remotes**](https://github.com/r-lib/remotes)) can also be used for installation if you prefer: 
-
-```
-# Install rmweather
-ghit::install_github("skgrange/rmweather", INSTALL_opts = "--install-tests")
-```
-
 ## Example usage
 
 **rmweather** contains example data from London which can be used to show the meteorological normalisation procedure. The example data are daily means of NO<sub>2</sub> and NO<sub>x</sub> observations at London Marylebone Road. The accompanying surface meteorological data are from London Heathrow, a major airport located 23 km west of Central London. 
@@ -107,9 +100,17 @@ data_pd %>%
   rmw_plot_partial_dependencies()
 ```
 
-The meteorologically normalised trend produced is below and is explained in a paper which is in preparation. 
+The meteorologically normalised trend produced is below.
 
 ![](man/figures/normalised_no2_example.png)
+
+## Examples and citations
+
+For usage examples see: 
+
+Grange, S. K., Carslaw, D. C., Lewis, A. C., Boleti, E., and Hueglin, C. (2018). [Random forest meteorological normalisation models for Swiss PM<sub>10</sub> trend analysis](https://www.atmos-chem-phys.net/18/6223/2018/). *Atmospheric Chemistry and Physics* 18.9, pp. 6223--6239.
+  
+Grange, S. K. and Carslaw, D. C. (2018). [Using meteorological normalisation to detect interventions in air quality time series](http://www.sciencedirect.com/science/article/pii/S004896971834244X). *Science of The Total Environment* 653, pp. 578--588.
 
 ## See also
 
