@@ -53,7 +53,8 @@ rmw_normalise <- function(model, df, variables = NA, n_samples = 300,
   stopifnot(class(model) == "ranger")
   
   # Default logic for cpu cores
-  n_cores <- ifelse(is.na(n_cores), n_cores_default(), n_cores)
+  n_cores <- as.integer(n_cores)
+  n_cores <- if_else(is.na(n_cores), n_cores_default(), n_cores)
   
   # Use all variables except the trend term
   if (is.na(variables[1])) {
@@ -67,8 +68,9 @@ rmw_normalise <- function(model, df, variables = NA, n_samples = 300,
   }
   
   # Sample the time series
-  if (verbose)
+  if (verbose) {
     message(str_date_formatted(), ": Sampling and predicting ", n_samples, " times...")
+  }
   
   # Do
   df <- seq_len(n_samples) %>% 
@@ -94,7 +96,7 @@ rmw_normalise <- function(model, df, variables = NA, n_samples = 300,
     
     df <- df %>% 
       group_by(date) %>% 
-      dplyr::summarise_if(is.numeric, dplyr::funs(mean(., na.rm = TRUE))) %>% 
+      dplyr::summarise_if(is.numeric, ~mean(., na.rm = TRUE)) %>% 
       ungroup()
     
   }
@@ -144,7 +146,7 @@ rmw_normalise_worker <- function(index, model, df, variables, replace,
   if (identical(class(value_predict), "list")) {
     
     # With se
-    df <- data_frame(
+    df <- tibble(
       date = df$date,
       se = value_predict$se,
       value_predict = value_predict$predictions
@@ -153,7 +155,7 @@ rmw_normalise_worker <- function(index, model, df, variables, replace,
   } else {
     
     # Without se
-    df <- data_frame(
+    df <- tibble(
       date = df$date,
       value_predict = value_predict
     )

@@ -11,8 +11,12 @@
 rmw_plot_partial_dependencies <- function(df) {
   
   # Check for variable names
-  if (!all(c("variable", "value", "partial_dependency") %in% names(df)))
-    stop("Input must have 'variable', 'value', and 'partial_dependency' variables...")
+  if (!all(c("variable", "value", "partial_dependency") %in% names(df))) {
+    stop(
+      "Input must have 'variable', 'value', and 'partial_dependency' variables.",
+      call. = FALSE
+    )
+  }
   
   plot <- df %>% 
     ggplot2::ggplot(ggplot2::aes(value, partial_dependency)) + 
@@ -43,12 +47,10 @@ rmw_plot_importance <- function(df, colour = "black") {
   
   # Check input
   if (!all(c("rank", "variable", "importance") %in% names(df))) {
-    
     stop(
-      "Data frame must contain `rank`, `variable`, and `importance` variables...", 
+      "Data frame must contain `rank`, `variable`, and `importance` variables.", 
       call. = FALSE
     )
-    
   }
   
   # Plot
@@ -82,25 +84,20 @@ rmw_plot_importance <- function(df, colour = "black") {
 #' @param bins Numeric vector giving number of bins in both vertical and 
 #' horizontal directions. 
 #' 
+#' @param coord_equal Should axes be forced to be equal? 
+#' 
 #' @author Stuart K. Grange
 #' 
 #' @return ggplot2 plot with a hex geometry.
 #' 
 #' @export
-rmw_plot_test_prediction <- function(df, bins = 30) {
-  
-  # Get axes limits
-  min_values <- min(c(df$value, df$value_predict), na.rm = TRUE)
-  max_values <- max(c(df$value, df$value_predict), na.rm = TRUE)
+rmw_plot_test_prediction <- function(df, bins = 30, coord_equal = TRUE) {
   
   # Plot
   plot <- ggplot2::ggplot(df, ggplot2::aes(value, value_predict)) + 
     ggplot2::geom_hex(bins = bins) +
     ggplot2::geom_abline(slope = 1, intercept = 0) + 
-    ggplot2::coord_equal() + 
     ggplot2::theme_minimal() +
-    ggplot2::ylim(min_values, max_values) + 
-    ggplot2::xlim(min_values, max_values) +
     viridis::scale_fill_viridis(
       option = "inferno",
       begin = 0.3,
@@ -108,6 +105,20 @@ rmw_plot_test_prediction <- function(df, bins = 30) {
     ) + 
     ggplot2::xlab("Observed") + 
     ggplot2::ylab("Predicted")
+  
+  # Fix axes
+  if (coord_equal) {
+    
+    # Get axes limits
+    min_values <- min(c(df$value, df$value_predict), na.rm = TRUE)
+    max_values <- max(c(df$value, df$value_predict), na.rm = TRUE)
+    
+    plot <- plot +
+      ggplot2::ylim(min_values, max_values) + 
+      ggplot2::xlim(min_values, max_values) +
+      ggplot2::coord_equal()
+    
+  }
   
   return(plot)
   
@@ -152,7 +163,7 @@ rmw_plot_normalised <- function(df, colour = "#6B186EFF") {
     
   }
   
-  # Overlay line  
+  # Overlay line
   plot <- plot + 
     ggplot2::geom_line(
       ggplot2::aes(date, value_predict), colour = colour
