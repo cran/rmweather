@@ -1,7 +1,7 @@
-c01a1aa7fd49f75e5f12fb97419aaccd *DESCRIPTION
+b5ea9bef2a340a9f407f00c469271793 *DESCRIPTION
 d32239bcb673463ab874e80d47fae504 *LICENSE
 4a3c269000fa9c462fb2259a249d0d30 *NAMESPACE
-a12da17d5cced25aff83ac124c4fd5b8 *NEWS.md
+2d596a84f3e889ae41bf7ed60fb3e928 *NEWS.md
 e3866a4a84ce82fdef5c15b9a211b34e *R/base_re_exports.R
 9056f36e8e2ae8edf5cbc5b285a349dc *R/data_london.R
 d08391fd3dfcfa1c27a65764a7b8e940 *R/data_london_normalised.R
@@ -49,4 +49,4 @@ d94fdf3cb502ed0ece9ece9fd2162692 *man/rmw_predict_the_test_set.Rd
 4647cb322d59b30e9a83d34b95b65888 *man/wday_monday.Rd
 17211e5705d7811cb9f7774918f7f833 *tests/testthat.R
 b9111cf65100cb9a708f3e79c348ffed *tests/testthat/test_01_utilities.R
-52d8df57e08eb14a610ad0400f5c9fc8 *tests/testthat/test_02_rmw_functions.R
+7ebdfb3a2454706b8cc600518efc11ea *tests/testthat/test_02_rmw_functions.R
