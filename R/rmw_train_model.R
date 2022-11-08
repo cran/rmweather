@@ -61,10 +61,7 @@ rmw_train_model <- function(df, variables, n_trees = 300, mtry = NULL,
                             min_node_size = 5, keep_inbag = TRUE, n_cores = NA, 
                             verbose = FALSE) {
   
-  # Check input
-  if (verbose) message(str_date_formatted(), ": Checking input data...")
-  
-  # Extra checks
+  # Check arguments
   if (anyDuplicated(variables) != 0) {
     stop("`variables` contains duplicate elements.", call. = FALSE)
   }
@@ -73,7 +70,7 @@ rmw_train_model <- function(df, variables, n_trees = 300, mtry = NULL,
     stop("`variables` given are not within input data frame.", call. = FALSE)
   }
   
-  # Standard checks
+  # Check input dataset
   df <- rmw_check_data(df, prepared = TRUE)
   
   # Filter and select input for modelling
@@ -86,7 +83,7 @@ rmw_train_model <- function(df, variables, n_trees = 300, mtry = NULL,
   n_cores <- as.integer(n_cores)
   n_cores <- if_else(is.na(n_cores), n_cores_default(), n_cores)
   
-  if (verbose) message(str_date_formatted(), ": Model training started...")
+  if (verbose) message(str_date_formatted(), ": Growing the forest...")
   
   # Train the model/grow the forest
   model <- ranger::ranger(
