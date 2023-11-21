@@ -12,6 +12,7 @@ rmw_normalise(
   replace = TRUE,
   se = FALSE,
   aggregate = TRUE,
+  keep_samples = FALSE,
   n_cores = NA,
   verbose = FALSE
 )
@@ -35,10 +36,13 @@ will slow down the predictions significantly.}
 
 \item{aggregate}{Should all the \code{n_samples} predictions be aggregated?}
 
+\item{keep_samples}{When \code{aggregate} is \code{FALSE}, should the 
+sampled/shuffled observations be kept?}
+
 \item{n_cores}{Number of CPU cores to use for the model predictions. Default
 is system's total minus one.}
 
-\item{verbose}{Should the function give messages?}
+\item{verbose}{Should the function give messages and display a progress bar?}
 }
 \value{
 Tibble.

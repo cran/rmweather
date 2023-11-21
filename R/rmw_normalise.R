@@ -18,10 +18,13 @@
 #' 
 #' @param aggregate Should all the \code{n_samples} predictions be aggregated? 
 #' 
+#' @param keep_samples When \code{aggregate} is \code{FALSE}, should the 
+#' sampled/shuffled observations be kept? 
+#' 
 #' @param n_cores Number of CPU cores to use for the model predictions. Default
 #' is system's total minus one. 
 #' 
-#' @param verbose Should the function give messages? 
+#' @param verbose Should the function give messages and display a progress bar? 
 #' 
 #' @author Stuart K. Grange
 #' 
@@ -57,7 +60,7 @@
 #' @export
 rmw_normalise <- function(model, df, variables = NA, n_samples = 300, 
                           replace = TRUE, se = FALSE, aggregate = TRUE, 
-                          n_cores = NA, verbose = FALSE) {
+                          keep_samples = FALSE, n_cores = NA, verbose = FALSE) {
   
   # Check inputs
   df <- rmw_check_data(df, prepared = TRUE)
@@ -67,30 +70,37 @@ rmw_normalise <- function(model, df, variables = NA, n_samples = 300,
   n_cores <- as.integer(n_cores)
   n_cores <- if_else(is.na(n_cores), n_cores_default(), n_cores)
   
-  # Use all variables except the trend term
+  # `keep_samples` can only be true when `aggregate` is false
+  if (keep_samples && aggregate) {
+    cli::cli_alert_info(
+      "{str_date_formatted()}: `keep_samples` has been set to `FALSE` because `aggregate` is `TRUE`..."
+    )
+    keep_samples <- FALSE
+  }
+  
+  # Use all variables except the trend term in default usage
   if (is.na(variables[1])) {
-    
     # Get model's variables
     variables <- model$forest$independent.variable.names
-    
     # Drop trend component
     variables <- setdiff(variables, "date_unix")
-    
   }
   
   # Sample the time series
   if (verbose) {
-    message(str_date_formatted(), ": Sampling and predicting ", n_samples, " times...")
+    cli::cli_alert_info(
+      "{str_date_formatted()}: Sampling and predicting `{n_samples}` time{?s}..."
+    )
   }
   
   # If no samples are passed
   if (n_samples == 0) {
     df <- tibble()
   } else {
-   
-    # Do
+    
+    # Do, not piping seq_len due to a package check note
     df <- seq_len(n_samples) %>% 
-      purrr::map_dfr(
+      purrr::map(
         ~rmw_normalise_worker(
           index = .x,
           model = model,
@@ -100,17 +110,21 @@ rmw_normalise <- function(model, df, variables = NA, n_samples = 300,
           se = se,
           n_cores = n_cores,
           n_samples = n_samples,
-          verbose = verbose
+          keep_samples = keep_samples
         ),
-        .id = "n_sample"
-      )
+        .progress = verbose
+      ) %>% 
+      purrr::list_rbind(names_to = "n_sample")
     
     # Aggregate predictions
     if (aggregate) {
       
-      if (verbose) message(str_date_formatted(), ": Aggregating predictions...")
+      if (verbose) {
+        cli::cli_alert_info("{str_date_formatted()}: Aggregating predictions...")
+      }
       
       df <- df %>% 
+        select(-n_sample) %>% 
         group_by(date) %>% 
         dplyr::summarise_if(is.numeric, ~mean(., na.rm = TRUE)) %>% 
         ungroup()
@@ -125,30 +139,7 @@ rmw_normalise <- function(model, df, variables = NA, n_samples = 300,
 
 
 rmw_normalise_worker <- function(index, model, df, variables, replace, 
-                                 n_samples, se, n_cores, verbose) {
-  
-  # Only every fifth prediction message
-  if (verbose && index %% 5 == 0) {
-    
-    # Calculate percent
-    message_precent <- round((index / n_samples) * 100, 2)
-    # Always have 2 dp
-    message_precent <- format(message_precent, nsmall = 1) 
-    message_precent <- stringr::str_c(message_precent, " %")
-    
-    # Print
-    message(
-      str_date_formatted(), 
-      ": Predicting ", 
-      index, 
-      " of ", 
-      n_samples, 
-      " times (", 
-      message_precent, 
-      ")..."
-    )
-    
-  }
+                                 n_samples, se, keep_samples, n_cores) {
   
   # Randomly sample observations
   n_rows <- nrow(df)
@@ -161,25 +152,26 @@ rmw_normalise_worker <- function(index, model, df, variables, replace,
   value_predict <- rmw_predict(model, df, se = se, n_cores = n_cores)
   
   # Build data frame of predictions
-  if (identical(class(value_predict), "list")) {
-    
+  if (inherits(value_predict, "list")) {
     # With se
-    df <- tibble(
+    df_predict <- tibble(
       date = df$date,
       se = value_predict$se,
       value_predict = value_predict$predictions
     )
-    
   } else {
-    
     # Without se
-    df <- tibble(
+    df_predict <- tibble(
       date = df$date,
       value_predict = value_predict
     )
-    
   }
   
-  return(df)
+  # If desired, keep the sampled/shuffled tibble and join the predictions to it
+  if (keep_samples) {
+    df_predict <- left_join(df, df_predict, by = join_by(date))
+  }
+  
+  return(df_predict)
   
 }

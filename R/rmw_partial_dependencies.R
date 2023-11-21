@@ -16,6 +16,10 @@
 #' @param n_cores Number of CPU cores to use for the model calculation. The 
 #' default is system's total minus one.
 #' 
+#' @param resolution The number of points that should be predicted for each 
+#' independent variable. If left as \code{NULL}, a default sequence will be 
+#' generated. See \code{\link{partial}} for details. 
+#' 
 #' @param verbose Should the function give messages? 
 #' 
 #' @return Tibble. 
@@ -56,11 +60,14 @@
 #' 
 #' @export
 rmw_partial_dependencies <- function(model, df, variable, training_only = TRUE, 
-                                     n_cores = NA, verbose = FALSE) {
+                                     resolution = NULL, n_cores = NA, 
+                                     verbose = FALSE) {
   
   # Check, predict is a generic function and needs to be loaded
   if (!"package:ranger" %in% search()) {
-    stop("The ranger package is not loaded.", call. = FALSE)
+    cli::cli_abort(
+      "The ranger package is not loaded and is required for this function."
+    )
   }
     
   # Check inputs
@@ -72,28 +79,29 @@ rmw_partial_dependencies <- function(model, df, variable, training_only = TRUE,
   n_cores <- if_else(is.na(n_cores), n_cores_default(), n_cores)
   
   # Predict all variables if not given
-  if (is.na(variable[1])) variable <- model$forest$independent.variable.names
+  if (is.na(variable[1])) {
+    variable <- model$forest$independent.variable.names
+  }
   
   # Message to user
   if (verbose) {
-    message(
-      str_date_formatted(), ": Predicting `", length(variable), "` variable(s)..."
-    )
+    cli::cli_alert_info("{str_date_formatted()}: Predicting `{length(variable)}` variable{?s}...")
   }
   
-  df_predict <- purrr::map_dfr(
-    variable, 
-    ~rmw_partial_dependencies_worker(
-      model = model,
-      df = df, 
-      variable = .x,
-      training_only = training_only,
-      n_cores = n_cores
-    )
-  )
-  
-  # To tibble
-  df_predict <- as_tibble(df_predict)
+  # Calculate the partial dependencies
+  df_predict <- variable %>% 
+    purrr::map(
+      ~rmw_partial_dependencies_worker(
+        model = model,
+        df = df, 
+        variable = .x,
+        training_only = training_only,
+        resolution = resolution,
+        n_cores = n_cores
+      )
+    ) %>% 
+    purrr::list_rbind() %>% 
+    as_tibble()
   
   return(df_predict)
   
@@ -101,7 +109,7 @@ rmw_partial_dependencies <- function(model, df, variable, training_only = TRUE,
 
 
 rmw_partial_dependencies_worker <- function(model, df, variable, training_only, 
-                                            n_cores) {
+                                            resolution, n_cores) {
   
   # Filter only to training set
   if (training_only) {
@@ -113,6 +121,7 @@ rmw_partial_dependencies_worker <- function(model, df, variable, training_only,
     model,
     pred.var = variable,
     train = df,
+    grid.resolution = resolution,
     num.threads = n_cores
   )
   

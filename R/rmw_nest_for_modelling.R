@@ -46,7 +46,7 @@ rmw_nest_for_modelling <- function(df, by = "resampled_set", n = 1,
   
   # A check, this keyword causes issues in the splitting function
   if ("fraction" %in% names(df)) {
-    stop("Input cannot contain a variable called `fraction`.", call. = FALSE)
+    cli::cli_abort("Input cannot contain a variable called `fraction`.")
   }
   
   # Add resampled_set to by if it does not exist
@@ -58,16 +58,16 @@ rmw_nest_for_modelling <- function(df, by = "resampled_set", n = 1,
     df_sampled <- mutate(df, resampled_set = 1L)
   } else {
     # Reproduce tibble n times
-    df_sampled <- purrr::map_dfr(1:n, ~df, .id = "resampled_set") %>% 
+    df_sampled <- n %>% 
+      seq_len() %>% 
+      purrr::map(~df) %>% 
+      purrr::list_rbind(names_to = "resampled_set") %>% 
       mutate(resampled_set = as.integer(resampled_set))
   }
   
   # Check if all variables are there
   if (!all(by %in% names(df_sampled))) {
-    stop(
-      "The variables requested for nesting are not contained in the input.", 
-      call. = FALSE
-    )
+    cli::cli_abort("The variables requested for nesting are not contained in the input.")
   }
   
   # Nest the tibble
