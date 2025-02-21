@@ -1,4 +1,4 @@
-c866dc1337540ac55f8c6894c1960635 *DESCRIPTION
+7e5b682f1a85cdb189d71e3e24105b4d *DESCRIPTION
 d32239bcb673463ab874e80d47fae504 *LICENSE
 a4cd43a108a5dd881fe9fa96b182e176 *NAMESPACE
 7e529bcfa29c99afb256d245fe8d24f0 *R/base_re_exports.R
@@ -12,10 +12,10 @@ fadff591daca397fb3538f2c54348177 *R/rmw_calculate_model_errors.R
 2701c03002ae3b558b63108b7e88af9c *R/rmw_find_breakpoints.R
 945ed816125749ccf4e73faa840ad537 *R/rmw_model_nested_sets.R
 cd366a366950d6089ea166a5feae1532 *R/rmw_model_statistics.R
-850a2b31f4b5e95a48ff9ee4099e513e *R/rmw_nest_for_modelling.R
+7ab7ae0c25b87d156ac6c9e4c8ef46bf *R/rmw_nest_for_modelling.R
 fbbb0282d1dbb110848ac7be1ed7fc49 *R/rmw_normalise.R
 54cbf7c29f910b7866b3021448b0c115 *R/rmw_normalise_nested_sets.R
-c715c994ce2ec7c6fb352805a271b013 *R/rmw_partial_dependencies.R
+9fcea743e34ea224b83d26761ed321ba *R/rmw_partial_dependencies.R
 d4a69af77f8dfc77c1e9718561363711 *R/rmw_predict.R
 4019d0f495d5852987d8a89b3404f31d *R/rmw_predict_nested_partial_dependencies.R
 8039f5c5dbe8e9c8536f0ada17a26b85 *R/rmw_predict_nested_sets.R
@@ -29,7 +29,7 @@ d8fa51f8e6a89c3795e56c4393d6988a *R/rmw_predict_the_test_set.R
 5b0300ede01bddb4ee5392d1ddff85db *data/data_london.rda
 d0f4a28ad1b272e6ddd2ce7761355ebe *data/data_london_normalised.rda
 b4e9f561da48661f7b1fc0422dd6c385 *data/model_london.rda
-c480b16ff9abd30881eb0fa15a58d7ea *inst/CITATION
+71ebc142ffa00dedaa410356de601404 *inst/CITATION
 1862ce47508f28b151ee1b4f71026306 *man/base-functions.Rd
 2a5570668caf5f402879d95dd7342a53 *man/data_london.Rd
 831cbd76ffd61eddb7d76cbaeb6058d0 *man/data_london_normalised.Rd
@@ -47,7 +47,7 @@ e35e23538089b8f912cfe0eebc7a5927 *man/rmw_find_breakpoints.Rd
 cbf45406407a96259385bf3b22a4fbe7 *man/rmw_nest_for_modelling.Rd
 2f08fcb64ea28def33b67d5c5ee32a2f *man/rmw_normalise.Rd
 5038a377679b3e68c41df65ce466d78a *man/rmw_normalise_nested_sets.Rd
-c415ff17892d21be1e15ed82120de3e0 *man/rmw_partial_dependencies.Rd
+1e55304f53b271bb31dd53e26b102a53 *man/rmw_partial_dependencies.Rd
 137e1cbb766f467d5f88d175f972c64c *man/rmw_plot_importance.Rd
 fff4121e255894f50f87d4404c7a5762 *man/rmw_plot_normalised.Rd
 b082876c3e36222a83712ede97fe84e5 *man/rmw_plot_partial_dependencies.Rd
