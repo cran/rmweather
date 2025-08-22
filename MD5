@@ -1,4 +1,4 @@
-7e5b682f1a85cdb189d71e3e24105b4d *DESCRIPTION
+d7b9c6385e6c9204523584f896d80b0a *DESCRIPTION
 d32239bcb673463ab874e80d47fae504 *LICENSE
 a4cd43a108a5dd881fe9fa96b182e176 *NAMESPACE
 7e529bcfa29c99afb256d245fe8d24f0 *R/base_re_exports.R
@@ -64,4 +64,4 @@ d94fdf3cb502ed0ece9ece9fd2162692 *man/rmw_predict_the_test_set.Rd
 2d935a6bd23ee7ebf51b95c4bd5dc244 *man/zzz.Rd
 17211e5705d7811cb9f7774918f7f833 *tests/testthat.R
 b9111cf65100cb9a708f3e79c348ffed *tests/testthat/test_01_utilities.R
-fd21f8f2176c5b1c86803ff0e3ee7b2b *tests/testthat/test_02_rmw_functions.R
+d2e5b655028da621a5db680623b4c48f *tests/testthat/test_02_rmw_functions.R
